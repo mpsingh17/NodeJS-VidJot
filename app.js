@@ -11,20 +11,6 @@ const { ensureAuthenticated } = require('./helpers/auth');
 
 const app = express();
 
-/**************************** Load Routes **************************/
-//ideas routes.
-const ideas = require('./routes/ideas');
-
-//user routes.
-const users = require('./routes/users');
-/**************************** End Load Routes **************************/
-
-/**************************** Configuration ****************************/
-//passport config
-require('./config/passport')(passport);
-
-
-/**************************** End Configuration ************************/
 
 //How middleware works.
 // app.use(function(req, res, next) {
@@ -32,11 +18,20 @@ require('./config/passport')(passport);
 //     next();
 // });
 
+/**************************** Configuration ****************************/
+//passport config
+require('./config/passport')(passport);
+
+//DB config
+const db = require('./config/database');
+
+/**************************** End Configuration ************************/
+
 //Map global promise - get rid of warning.
 mongoose.Promise = global.Promise;
 
 //connect to mongoose
-mongoose.connect('mongodb://localhost/vidjot-dev', {
+mongoose.connect(db.mongoURI, {
     useMongoClient: true
 })
 .then(() => { console.log('mongoDB connected'); })
@@ -78,10 +73,12 @@ app.use(function(req, res, next) {
     res.locals.error = req.flash('error');
     res.locals.user = req.user || null;
     next();
+    // console.log('after');
 });
 
 /************************************* End Midllewares ******************************/
 
+/************************************* Static pages *********************************/
 //Index request GET
 app.get('/', (req, res) => {
     const title = 'Welcome';
@@ -95,6 +92,16 @@ app.get('/about', (req, res) => {
     res.render('about');
 });
 
+/********************************* End Static pages *********************************/
+
+/**************************** Load Routes **************************/
+//ideas routes.
+const ideas = require('./routes/ideas');
+
+//user routes.
+const users = require('./routes/users');
+/**************************** End Load Routes **************************/
+
 /**************************** Using routes *********************************/
 //using idea routes
 app.use('/ideas', ensureAuthenticated, ideas)
@@ -104,7 +111,7 @@ app.use('/users', users);
 
 /**************************** End Using routes *********************************/
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
     console.log(`server started on port ${port}`);
 });

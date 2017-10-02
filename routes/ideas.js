@@ -32,12 +32,12 @@ router.get('/edit/:id', (req, res) => {
         _id: req.params.id
     })
     .then(idea => {
-        if (idea.user != req.user.id) {
+        if(idea.user != req.user.id) {
             req.flash('error_msg', 'Unauthorised access!!');
             res.redirect('/ideas');
         } else {
             res.render('ideas/edit', {
-                idea: idea
+               idea: idea
             });
         }
     });
